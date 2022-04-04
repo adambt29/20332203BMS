@@ -1,4 +1,3 @@
-package finalProject;
 
 import java.util.Scanner;
 
@@ -14,7 +13,11 @@ public class Interface {
 		int input= userInput.nextInt();
 		return input;
 	}
-	public void main() {
+	public static void main() {
+		ternarySearch tst=new ternarySearch("C:\\Users\\abeatty\\eclipse"
+				+ "\\elclipse saved work\\algorithms and data structures 2\\"
+				+ "final project\\stops.txt");//may need to change file
+		edge graph=new edge();
 		
 	}
 }
