@@ -1,7 +1,10 @@
 package finalProject;
 
 import java.util.Scanner;  
-
+/*main program- asks the user questions, 
+takes input and then bring the program
+relevant method to give user the correct
+outout*/
 public class Interface {
 	
 	/*public int choice(ternarySearch string, edge weight) {
@@ -12,7 +15,7 @@ public class Interface {
 				"4: to quit");
 		int input= userInput.nextInt();
 		return input;
-	}**/
+	}*/
 	public static void main(String args[]) {
 	/*	ternarySearch tst=new ternarySearch("C:\\Users\\abeatty\\eclipse"
 				+ "\\elclipse saved work\\algorithms and data structures 2\\"
@@ -107,7 +110,7 @@ public class Interface {
 						}
 					else if(problem3.checkRealTime()) {
 						for(int i=0;i<getGivenTimes.size();i++) {
-						 System.out.print(getGivenTimes.get(i));
+						 System.out.print(getGivenTimes(user).get(i));
 						}
 					}
 					else {
