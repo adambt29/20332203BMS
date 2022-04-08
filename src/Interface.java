@@ -5,19 +5,13 @@ import java.util.Scanner;
 
 public class Interface {
 public static Scanner userInput=new Scanner(System.in);
+
 	public static void main(String[] args) {
-		/*	ternarySearch tst=new ternarySearch("C:\\Users\\abeatty\\eclipse"
-		+ "\\elclipse saved work\\algorithms and data structures 2\\"
-		+ "final project\\stops.txt");//may need to change file
-		**/
-EdgeWeightedGraph graph=new EdgeWeightedGraph();
+		
 boolean quit=false;
 String user="";
 int q=0;
-EdgeWeightedGraph[] stop=null;
-/*shortestPath problem1=new shortestPath(0,0);
-ternarySearch problem2=new ternarySearch();
-time problem3=new time(); //temp name change when set up*/
+
 
 while(quit=false) {
 	user="";
@@ -86,27 +80,23 @@ while(quit=false) {
 		}
 			
 		case 3:
-			while(!quit && !returnToInterface) {
-				System.out.print("enter back to return to main menu\n"
-						+ "or enter quit\n"
-						+ "or enter the arrival time you are looking for "
-						+ "in the format hh mm ss");
-				user=userInput.nextLine().strip();
-				if(user.equalsIgnoreCase("back")) {
-					returnToInterface=true;
-				}
-				else if(user.equalsIgnoreCase("quit")) {
-					quit=true;
-				}
-		  else if(checkTime(user)) {
-				for(int i=0;i<problem3.getGivenTimes(user).size();i++) {
-				 System.out.println(time(user));
-				}
+			int hours = readIntFromUser("Type in the arrival time hours: ");
+			while (hours > 23 || hours < 0) 
+			{
+				hours = readIntFromUser("Hours must be 0-23: ");
 			}
-			else {
-				System.out.print("invalid");
+			int minutes = readIntFromUser("Type in the arrival time minutes: ");
+			while (minutes > 59 || minutes < 0) 
+			{
+				minutes = readIntFromUser("Minutes must be 0-59: ");
 			}
+			int seconds = readIntFromUser("Type in the arrival time seconds: ");
+			while (seconds > 59 || seconds < 0)
+			{
+				seconds = readIntFromUser("Seconds must be 0-59: ");
 			}
+			int time = (hours * 60 * 60) + (minutes * 60) + seconds;
+			graph.findTripByTime(time);
 			break;
 		case 4:
 			quit=true;
@@ -116,17 +106,30 @@ while(quit=false) {
 	else {
 		System.out.print("invalid: user must enter an interger please try again");
 		userInput.nextLine();
-	}
-}
-	}
-public static boolean checkTime(String user) {
-		return true;
-		}
-public static void time(String user) {//,edge graph) {
-	
-}
-public Stop[] searchByName(String user, Stop[]stops) {
-	return graph.searchStops(user);
-}
-}
 
+          }
+      }
+	}
+	public static boolean isExit(String str) 
+	{
+		return str.equalsIgnoreCase("exit");
+	}
+
+	public static int readIntFromUser(String question) 
+	{
+		System.out.print(question);
+		
+		String inputStr = userInput.next();
+		if (isExit(inputStr))
+			System.exit(0);
+		while (inputStr.replaceAll("[0-9]", "").length() != 0) 
+		{
+			System.out.print("Input must be a positive integer: ");
+			inputStr = userInput.next();
+			if (isExit(inputStr))
+				System.exit(0);
+		}
+
+		return Integer.parseInt(inputStr);
+	}
+}	
