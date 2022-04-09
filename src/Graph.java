@@ -1,23 +1,29 @@
-package finalProject;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Stack;
 import java.util.HashMap;
 import java.util.Collections;
-
+/*
+ * essentially takes in the data from the userinterface and based on the choice
+ * made by the user the data is split up in different ways
+ * the private Loader file at the end uses bufffered reader to take data from file(file depends on choice)
+ * and returns in an arrayList we we can then further make sense of in Stop.java and Edge.java and then sort
+ * user .sort or the Tst function.
+ */
 public class Graph
 {
 	Stops[] stops;
+	TST<Stops> tst;
 	HashMap<Integer, Integer> Ids;
 
-	//reading in files
-	public Graph(String stopsTxt, String tripsTxt, String transferTxt) 
+	public Graph(String stopsTxt, String stopTimesTxt, String transferTxt) 
 	{
-	
+		
+	    System.out.print("wait for files to load");
 		Ids = new HashMap<Integer, Integer>();		
 		stops = readInStopData(stopsTxt);	
-		Trips(stops, tripsTxt);
+		Trips(stops, stopTimesTxt);
 		Transfers(stops, transferTxt);	
 		tst = new TST<Stops>();
 		for (int i = 0; i < stops.length; i++) 
@@ -26,22 +32,32 @@ public class Graph
 		}
 
 	}
-
-	/**
-	 * Finds all trips with arrival time = input time
-	 * 
-	 * @param time: time we want to find
-	 */
+	
+//taken from assignment2-going to work on last
+	//should use another shortestpath algorithm?
+	
+	public void floydWarshall() {
+		/*for(int i=0;i<currentIntersection;i++) {
+    		for(int j=0;j<currentIntersection;j++) {
+    			for(int x=0;x<currentIntersection;x++) {
+    				if(graph[j][x]>graph[j][i]+graph[i][x]) {
+    					graph[j][x]=graph[j][i]+graph[i][x]; //going through all exhaustive options.
+    				}
+    			}
+    		}
+    	}*/
+	}
+	
 	public void findTripByTime(int time) 
 	{
 		ArrayList<Integer> matchingTrips = new ArrayList<Integer>();
 		//go through each stop, then go through each edge in that stop
 		for (int i = 0; i < stops.length; i++) 
 		{
-			ArrayList<BusEdge> edges = stops[i].getEdges();
+			ArrayList<Edge> edges = stops[i].Edges();
 			for (int j = 0; j < edges.size(); j++)
 			{
-				BusEdge currentEdge = edges.get(j);
+				Edge currentEdge = edges.get(j);
 
 				//if edges arrival time == input, add it to an arraylist
 				if (currentEdge.getArrivalTimeAsSeconds() == time) 
@@ -53,7 +69,6 @@ public class Graph
 
 		Collections.sort(matchingTrips);
 
-		//print out any details concerning the trips found
 		if (matchingTrips.size() == 0) 
 		{
 			System.out.println("\nThere were no trips with your given arrival time.");
@@ -65,7 +80,7 @@ public class Graph
 				System.out.println("Details for trip: " + matchingTrips.get(i));
 
 				//get the first edge that corresponds to that trip id
-				BusEdge currentEdge = stops[tripIDs.get(matchingTrips.get(i))].findBusEdge(matchingTrips.get(i));
+				Edge currentEdge = stops[Ids.get(matchingTrips.get(i))].findBusEdge(matchingTrips.get(i));
 
 				//go down the trip until you reach the edge which had the correct arrival time, printing details as you go
 				while (currentEdge != null && currentEdge.getArrivalTimeAsSeconds() <= time) 
@@ -78,6 +93,8 @@ public class Graph
 		}
 	}
 
+
+
 	/**
 	 * Reads in stop_times file and creates edges from data, adding them to the
 	 * approppriate bus stop
@@ -85,7 +102,7 @@ public class Graph
 	 * @param file:  name of file that contains trip information
 	 * @param stops: Array of all bus stops
 	 **/
-	private void Trips(BusStop[] stops, String file)
+	private void Trips(Stops[] stops, String file)
 	{
 		//use csvs to create a 2d array from the file
 		CSVLoader c = new CSVLoader(file);
@@ -121,17 +138,33 @@ public class Graph
 				//check for invalid times
 				if (!(depHour > 23 || arrHour > 23)) 
 				{
-					stops[fromIndex].addEdge(new BusEdge(tripID, stops[fromIndex], stops[toIndex], departureTime,
+					stops[fromIndex].addEdge(new Edge(tripID, stops[fromIndex], stops[toIndex], departureTime,
 							arrivalTime, seq, toDist - fromDist));
 				}
 
 				//if the tripID has not been set, set it to equal the first bus stop index
-				if (!tripIDs.containsKey(tripID))
-					tripIDs.put(tripID, fromIndex);
+				if (!Ids.containsKey(tripID))
+					Ids.put(tripID, fromIndex);
 			}
 		}
 	}
-	
+	/**
+	 * Return array of bus stops that include part of the input in their name using a tst
+	 * @param busStopName : string to search
+	 * @return array of all possible matches
+	 */
+	public Stops[] searchBusStop(String busStopName) 
+	{
+		String[] matches = tst.keysWithPrefix(busStopName.toUpperCase());
+
+		Stops[] stops = new Stops[matches.length];
+		for (int i = 0; i < stops.length; i++) 
+		{
+			stops[i] = tst.get(matches[i]);
+		}
+		Arrays.sort(stops);
+		return stops;
+	}
 
 	/**
 	 * Reads in transfers file and creates edges from data and adds it to
@@ -140,7 +173,7 @@ public class Graph
 	 * @param file:  name of file that contains transfers
 	 * @param stops: array of all bus stops
 	 */
-	private void Transfers(BusStop[] stops, String file) 
+	private void Transfers(Stops[] stops, String file) 
 	{
 		//Use a csv loader to create an arraylist of strings of data from the file
 		CSVLoader c = new CSVLoader(file);
@@ -160,7 +193,7 @@ public class Graph
 			{
 				cost = Integer.parseInt(transfer[3]);
 			}
-			stops[fromIndex].addEdge(new BusEdge(stops[fromIndex], stops[toIndex], cost));
+			stops[fromIndex].addEdge(new Edge(stops[fromIndex], stops[toIndex], cost));
 		}
 	}
 
@@ -198,12 +231,12 @@ public class Graph
 	 * @param fileName: name of file that contains the stops
 	 * @return array of all bus stops
 	 */
-	private BusStop[] readInStopData(String file) 
+		private Stops[] readInStopData(String file) 
 	{
 		//use a csv loader to create an arraylist of string from the file
 		CSVLoader c = new CSVLoader(file);
 		ArrayList<String> list = c.readFile();
-		BusStop[] stops = new BusStop[list.size() - 1];
+		Stops[] stops = new Stops[list.size() - 1];
 
 		//create a busstop from the given data
 		for (int i = 0; i < stops.length; i++) 
@@ -237,7 +270,7 @@ public class Graph
 				busStopName = busStopName.substring(2) + " " + token;
 			}
 
-			stops[i] = new BusStop(Integer.parseInt(data[0]), code, busStopName, data[3], Double.parseDouble(data[4]),
+			stops[i] = new Stops(Integer.parseInt(data[0]), code, busStopName, data[3], Double.parseDouble(data[4]),
 					Double.parseDouble(data[5]), data[6], Integer.parseInt(data[8]), parent);
 		}
 		
@@ -251,15 +284,49 @@ public class Graph
 		return stops;
 	}
 
-	/**
-	 * Sort the edges 
-	 */
-	private void sortEdges()
+}
+
+
+//uses bufffered reader to split up the files and returns as an array list- called in the graph method
+class CSVLoader 
+{
+	private BufferedReader reader;
+	
+	 CSVLoader(String filename) 
 	{
-		for (BusStop stop : stops)
+		try
 		{
-			stop.sortEdges();
+			reader = new BufferedReader(new FileReader(filename));
+		} 
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
+
+	public ArrayList<String> readFile() 
+	{
+		if(reader != null)
+		{
+			ArrayList<String> list = new ArrayList<String>();
+			try
+			{
+				String line;
+				while ((line = reader.readLine()) != null) 
+				{
+					list.add(line);
+				}
+				reader.close();
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			return list;
+		}
+		return new ArrayList<String>();
+	}
+
 
 }

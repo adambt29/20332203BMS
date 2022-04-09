@@ -1,123 +1,189 @@
-package finalProject;
-
-import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Interface {
-public static Scanner userInput=new Scanner(System.in);
+public class Main 
+{
+	private Graph graph;
+	private Scanner userInput;
+	public static String user = "";
 
-	public static void main(String[] args) {
-		
-boolean quit=false;
-String user="";
-int q=0;
+	
+	public static void main(String[] args) 
+	{
+		//starts the program
+		new Main(user);
+	}
 
+	Main(String user) 
+	{
+		graph = new Graph(user + "C:\\Users\\Owner\\git\\20332203BMS\\stops.txt", user + 
+				"C:\\Users\\Owner\\git\\20332203BMS\\stop_times.txt", 
+				user + "C:\\Users\\Owner\\git\\20332203BMS\\transfers.txt");
+		userInput = new Scanner(System.in);
+		run();
+	}
 
-while(quit=false) {
-	user="";
-	q=0; //just to reset 
-	System.out.print("choose between the folowing options/n"+
-            "1:find the shortest distance between two bus stops/n"+
-			"2: to search for a bus stop/n"+
-            "3: search for trips and an arrival time"+
-			"4: to quit");
-	if(userInput.hasNextInt()) {
-		q=userInput.nextInt();
-		boolean returnToInterface=false;
-		switch(q) {
-		case 1://may need a bit of fixing
-			int stop1=0;
-			int stop2=0;
-			while(!quit && !returnToInterface) {
-				System.out.print("enter the stop you are starting at\n"
-						//+ "and the stop you wish to finish \n"
-						+ "or enter quit/n"
-						+ "or enter return to go back to the main menu");
-				if(userInput.hasNextInt()) {
-					stop1=userInput.nextInt();
-					System.out.print("now enter the stop you which to finish at");
-					if(userInput.hasNextInt())	{
-						stop2=userInput.nextInt();
-						System.out.print("the shortest path from "+stop1
-								+"to "+stop2);
-							//	+  problem1.shortestPath(stop1,stop2));
+	/**
+	 * Run the program
+	 */
+	private void run() 
+	{
+		String s = "";
+		Stops[] stops = null;
+		boolean quit=false;
+		//main interface loop, runs until user exits
+		while (!quit) 
+		{
+			System.out.print("choose between the folowing options\n"+
+		            "1:find the shortest distance between two bus stops\n"+
+					"2: to search for a bus stop\n"+
+		            "3: search for trips and an arrival time\n"+
+					"4: to quit  ");
+
+			s = userInput.next();
+			if (isExit(s))
+				System.exit(0);
+
+			while (s.length() != 1)
+			{
+				System.out.print("Incorrect input, try again: ");
+				s = userInput.next();
+				if (isExit(s))
+					System.exit(0);
+			}
+
+			switch (s.toLowerCase()) 
+			{
+			case "1":
+				graph.floydWarshall();
+				break;
+			case "2":
+				stops = searchByName("Search for bus stop by name: ", stops, s);
+				if (stops.length == 0) 
+				{
+					System.out.println("No results found.");
+				} 
+				else 
+				{
+					for (Stops stop : stops) 
+					{
+						System.out.println(stop);
 					}
 				}
-				else {
-			  user=userInput.nextLine().strip();
-			  if(user.equalsIgnoreCase("back")) {
-					returnToInterface=true;
-				}
-				else if(user.equalsIgnoreCase("quit")) {
-					quit=true;
-				}
-				else {
-					System.out.print("invalid");
-				}
-				}
 				break;
-		}
-		case 2:
-			while(!quit && !returnToInterface) {
-				System.out.print("enter back to return to main menu\n"
-						+ "or enter quit\n"
-						+ "or enter the bus stop you are looking for");
-				user=userInput.nextLine().strip();
-				if(user.equalsIgnoreCase("back")) {
-					returnToInterface=true;
+			case "3":
+				int hours = readInt("Type in the arrival time hours: ");
+				while (hours > 23 || hours < 0) 
+				{
+					hours = readInt("Hours must be 0-23: ");
 				}
-				else if(user.equalsIgnoreCase("quit")) {
-					quit=true;
+				int minutes = readInt("Type in the arrival time minutes: ");
+				while (minutes > 59 || minutes < 0) 
+				{
+					minutes = readInt("Minutes must be 0-59: ");
 				}
-				else {
-					stops=searchByName(user,stops);
-					for(Stops stop:stops) {
-						System.out.print(stop);
-					
+				int seconds = readInt("Type in the arrival time seconds: ");
+				while (seconds > 59 || seconds < 0)
+				{
+					seconds = readInt("Seconds must be 0-59: ");
 				}
-				}
+				int time = (hours * 60 * 60) + (minutes * 60) + seconds;
+				graph.findTripByTime(time);
 				break;
-		}
-			
-		case 3:
-			int hours = readIntFromUser("Type in the arrival time hours: ");
-			while (hours > 23 || hours < 0) 
-			{
-				hours = readIntFromUser("Hours must be 0-23: ");
-			}
-			int minutes = readIntFromUser("Type in the arrival time minutes: ");
-			while (minutes > 59 || minutes < 0) 
-			{
-				minutes = readIntFromUser("Minutes must be 0-59: ");
-			}
-			int seconds = readIntFromUser("Type in the arrival time seconds: ");
-			while (seconds > 59 || seconds < 0)
-			{
-				seconds = readIntFromUser("Seconds must be 0-59: ");
-			}
-			int time = (hours * 60 * 60) + (minutes * 60) + seconds;
-			graph.findTripByTime(time);
-			break;
-		case 4:
-			quit=true;
-			break;
-		}
-	}
-	else {
-		System.out.print("invalid: user must enter an interger please try again");
-		userInput.nextLine();
+			case "4":
+				quit=true;
+				break;
+			default:
+				break;
 
-          }
-      }
+			}
+		}
 	}
-	public static boolean isExit(String str) 
+
+	/**
+	 * checks if the subarray of busstops has an index in it
+	 * @param index : index to search for
+	 * @param stops :subarray of busstops
+	 * @return true if yes, false otherwise
+	 */
+	private boolean checkIndex(int index, Stops[] stops) 
+	{
+		for (Stops stop : stops) 
+		{
+			if (index == stop.getIndex()) 
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Calls the search method if input isnt exit
+	 * @param str : prompt for the user
+	 * @param stops : array of stops
+	 * @param inputLine : user will write to, search by this
+	 * @return array of bus stops which contain that prompt
+	 */
+	private Stops[] searchByName(String str, Stops[] stops, String inputLine) 
+	{
+		inputLine = readString(str);
+		if (isExit(inputLine))
+			System.exit(0);
+		return graph.searchBusStop(inputLine);
+	}
+
+	/**
+	 * Prompts user to enter a bus stop name, then gets the user to pick a bus stop 
+	 * @param str : prompt for the user
+	 * @param stops : array of bus stops
+	 * @param inputLine : user will write to, search by this
+	 * @return bus stop the user wanted
+	 */
+	public Stops getStopFromUser(String str, Stops[] stops, String inputLine) 
+	{
+		while(true)
+		{
+			//uses tst to see which stops contain the string
+			stops = searchByName(str, stops, inputLine);
+			for (Stops stop : stops)
+			{
+				System.out.println(stop);
+			}
+			if (stops.length == 0) 
+			{
+				System.out.println("No results were found for your input, please try again.");
+			}
+			else
+				break;
+		}
+
+		//prompts the user to pick an option from the array of viable bus stops
+		int index = readInt("Please choose a bus stop by typing in the number X from [X]: ");
+		while (!checkIndex(index, stops)) 
+		{
+			index = readInt("Please choose a valid number: ");
+		}
+		return graph.stops[index];
+	}
+
+	/**
+	 * Checks if input is exit
+	 * @param str ; input to check
+	 * @return true if yes, false otherwise
+	 */
+	public boolean isExit(String str) 
 	{
 		return str.equalsIgnoreCase("exit");
 	}
 
-	public static int readIntFromUser(String question) 
+	/**
+	 * Prompts the user to enter an int, checks if input is an integer
+	 * @param question : prompt for the user
+	 * @return correctly entered int
+	 */
+	public int readInt(String q) 
 	{
-		System.out.print(question);
+		System.out.print(q);
 		
 		String inputStr = userInput.next();
 		if (isExit(inputStr))
@@ -132,4 +198,20 @@ while(quit=false) {
 
 		return Integer.parseInt(inputStr);
 	}
-}	
+
+	/**
+	 * prompts the user for a string, checks if input is non-empty and returns
+	 * @param question :  prompt for the user
+	 * @return entered string
+	 */
+	public String readString(String q)
+	{
+		System.out.print(q);
+		String s = "";
+		while (s.length() == 0) 
+		{
+			s = userInput.nextLine();
+		}
+		return s;
+	}
+}
