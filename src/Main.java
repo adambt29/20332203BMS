@@ -71,20 +71,20 @@ public class Main
 				}
 				break;
 			case "3":
-				int hours = readInt("Type in the arrival time hours: ");
+				int hours = readInt("Type time in hours: ");
 				while (hours > 23 || hours < 0) 
 				{
-					hours = readInt("Hours must be 0-23: ");
+					hours = readInt("Hours must be between 0-23: ");
 				}
-				int minutes = readInt("Type in the arrival time minutes: ");
+				int minutes = readInt("Type time in minutes: ");
 				while (minutes > 59 || minutes < 0) 
 				{
-					minutes = readInt("Minutes must be 0-59: ");
+					minutes = readInt("Minutes must be between 0-59: ");
 				}
-				int seconds = readInt("Type in the arrival time seconds: ");
+				int seconds = readInt("Type time in seconds: ");
 				while (seconds > 59 || seconds < 0)
 				{
-					seconds = readInt("Seconds must be 0-59: ");
+					seconds = readInt("Seconds must be between 0-59: ");
 				}
 				int time = (hours * 60 * 60) + (minutes * 60) + seconds;
 				graph.findTripByTime(time);

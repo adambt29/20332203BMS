@@ -51,18 +51,16 @@ public class Graph
 	public void findTripByTime(int time) 
 	{
 		ArrayList<Integer> matchingTrips = new ArrayList<Integer>();
-		//go through each stop, then go through each edge in that stop
 		for (int i = 0; i < stops.length; i++) 
 		{
-			ArrayList<Edge> edges = stops[i].Edges();
+			ArrayList<Transfers> edges = stops[i].Edges();
 			for (int j = 0; j < edges.size(); j++)
 			{
-				Edge currentEdge = edges.get(j);
+				Transfers currentTransfer = edges.get(j);
 
-				//if edges arrival time == input, add it to an arraylist
-				if (currentEdge.getArrivalTimeAsSeconds() == time) 
+				if (currentTransfer.getArrivalTimeAsSeconds() == time) 
 				{
-					matchingTrips.add(currentEdge.getTripID());
+					matchingTrips.add(currentTransfer.getTripID());
 				}
 			}
 		}
@@ -79,10 +77,8 @@ public class Graph
 			{
 				System.out.println("Details for trip: " + matchingTrips.get(i));
 
-				//get the first edge that corresponds to that trip id
-				Edge currentEdge = stops[Ids.get(matchingTrips.get(i))].findBusEdge(matchingTrips.get(i));
+				Transfers currentEdge = stops[Ids.get(matchingTrips.get(i))].findBusEdge(matchingTrips.get(i));
 
-				//go down the trip until you reach the edge which had the correct arrival time, printing details as you go
 				while (currentEdge != null && currentEdge.getArrivalTimeAsSeconds() <= time) 
 				{
 					System.out.println(currentEdge);
@@ -104,18 +100,14 @@ public class Graph
 	 **/
 	private void Trips(Stops[] stops, String file)
 	{
-		//use csvs to create a 2d array from the file
 		CSVLoader c = new CSVLoader(file);
 		ArrayList<String> list = c.readFile();
 
-		//start from i =2 bc the first two lines of the trip file are descriptions
-		//create edges from the information
 		for (int i = 2; i < list.size(); i++)
 		{
 			String[] from = list.get(i - 1).split(",");
 			String[] to = list.get(i).split(",");
 
-			//wont add a new edge if the trip changes
 			if (from[0].equals(to[0])) 
 			{
 				int fromIndex = findBusStop(Integer.parseInt(from[3]));
@@ -127,7 +119,6 @@ public class Graph
 				double fromDist = 0;
 				double toDist = Double.parseDouble(to[to.length - 1]);
 
-				//some edges dont have distances, so must double check this
 				if (from.length == 9) 
 				{
 					fromDist = Double.parseDouble(from[from.length - 1]);
@@ -138,7 +129,7 @@ public class Graph
 				//check for invalid times
 				if (!(depHour > 23 || arrHour > 23)) 
 				{
-					stops[fromIndex].addEdge(new Edge(tripID, stops[fromIndex], stops[toIndex], departureTime,
+					stops[fromIndex].addEdge(new Transfers(tripID, stops[fromIndex], stops[toIndex], departureTime,
 							arrivalTime, seq, toDist - fromDist));
 				}
 
@@ -175,25 +166,21 @@ public class Graph
 	 */
 	private void Transfers(Stops[] stops, String file) 
 	{
-		//Use a csv loader to create an arraylist of strings of data from the file
 		CSVLoader c = new CSVLoader(file);
 		ArrayList<String> list = c.readFile();
 
-		//create transfer edges from the file
 		for (int i = 1; i < list.size(); i++)
 		{
-			//split the strings to create a array of data
 			String[] transfer = list.get(i).split(",");
 			int fromIndex = findBusStop(Integer.parseInt(transfer[0]));
 			int toIndex = findBusStop(Integer.parseInt(transfer[1]));
 			int type = Integer.parseInt(transfer[2]);
 			int cost = 0;
-			//If transfer type is 1 (non-immediate) read in the associated cost
 			if (type != 0) 
 			{
 				cost = Integer.parseInt(transfer[3]);
 			}
-			stops[fromIndex].addEdge(new Edge(stops[fromIndex], stops[toIndex], cost));
+			stops[fromIndex].addEdge(new Transfers(stops[fromIndex], stops[toIndex], cost));
 		}
 	}
 
@@ -206,7 +193,6 @@ public class Graph
 	 **/
 	public int findBusStop(int id) 
 	{
-		//binary search to find bus stop
 		int low = 0;
 		int high = stops.length - 1;
 
@@ -233,30 +219,25 @@ public class Graph
 	 */
 		private Stops[] readInStopData(String file) 
 	{
-		//use a csv loader to create an arraylist of string from the file
 		CSVLoader c = new CSVLoader(file);
 		ArrayList<String> list = c.readFile();
 		Stops[] stops = new Stops[list.size() - 1];
 
-		//create a busstop from the given data
 		for (int i = 0; i < stops.length; i++) 
 		{
 			String[] data = list.get(i + 1).split(",");
 			int parent = -1;
-			//some busstops dont have parents, need to check length to see if they do
 			if (data.length == 10) 
 			{
 				parent = Integer.parseInt(data[9]);
 			}
 			
 			int code = -1;
-			//some busstops have empty codes, need to check if given spot is not empty
 			if (!data[1].equals(" ")) 
 			{
 				code = Integer.parseInt(data[1]);
 			}
 			
-			//edit name to put extra tokens at the end of the string
 			String token = data[2].split(" ")[0];
 			String busStopName = data[2];
 			if (token.length() == 2 && token.charAt(1) == 'B')
@@ -274,9 +255,7 @@ public class Graph
 					Double.parseDouble(data[5]), data[6], Integer.parseInt(data[8]), parent);
 		}
 		
-		//sort the stops by trip id
 		Arrays.sort(stops);
-		//store the index of each busstop in the array in that busstop
 		for (int i = 0; i < stops.length; i++) 
 		{
 			stops[i].setIndex(i);

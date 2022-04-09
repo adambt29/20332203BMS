@@ -1,4 +1,4 @@
-/takes in data from stops.txt file
+//takes in data from stops.txt file
 //returns specific data that the user has implied they are looking for.
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class Stops implements Comparable<Stops>
     private int locType;
     private int parent;
 
-    private ArrayList<Edge> edges;
+    private ArrayList<Transfers> edges;
     private int i;
 
     public Stops(int id, int code, String name, String desc, double lat, double lon, String zoneID, int locType,
@@ -32,7 +32,7 @@ public class Stops implements Comparable<Stops>
         this.locType = locType;
         this.parent = parent;
 
-        edges = new ArrayList<Edge>();
+        edges = new ArrayList<Transfers>();
         i = -1;
     }
 
@@ -76,7 +76,7 @@ public class Stops implements Comparable<Stops>
      * @param id : id we want to find
      * @return busedge with that trip id, null if it doesnt exist
      */
-     public Edge findBusEdge(int id) 
+     public Transfers findBusEdge(int id) 
     {
     	//uses binary search
         int low = 0;
@@ -152,13 +152,13 @@ public class Stops implements Comparable<Stops>
     }
 
    
-    public ArrayList<Edge> Edges() 
+    public ArrayList<Transfers> Edges() 
     {
         return edges;
     }
 
     
-    public boolean addEdge(Edge edge) 
+    public boolean addEdge(Transfers edge) 
     {
         return edges.add(edge);
     }
@@ -182,5 +182,3 @@ public class Stops implements Comparable<Stops>
     }
 
 }
-
-
