@@ -1,10 +1,12 @@
-package finalProject;
+/takes in data from stops.txt file
+//returns specific data that the user has implied they are looking for.
 import java.util.ArrayList;
 import java.util.Collections;
-
+// very similar idea to edges.java from textbook just taking in all the headings from the stop.txt file
 public class Stops implements Comparable<Stops> 
 {
-    private int ID;
+	//variable names can be seen in stops.txt fuile which will help to full understand what they all do.
+    private int id;
     private int code;
     private String name;
     private String desc;
@@ -14,13 +16,13 @@ public class Stops implements Comparable<Stops>
     private int locType;
     private int parent;
 
-    
-    private int index;
+    private ArrayList<Edge> edges;
+    private int i;
 
-    public Stops(int ID, int code, String name, String desc, double lat, double lon, String zoneID, int locType,
+    public Stops(int id, int code, String name, String desc, double lat, double lon, String zoneID, int locType,
             int parent) 
     {
-        this.ID = ID;
+        this.id = id;
         this.code = code;
         this.name = name;
         this.desc = desc;
@@ -30,8 +32,8 @@ public class Stops implements Comparable<Stops>
         this.locType = locType;
         this.parent = parent;
 
-        
-        index = -1;
+        edges = new ArrayList<Edge>();
+        i = -1;
     }
 
     /**
@@ -39,29 +41,15 @@ public class Stops implements Comparable<Stops>
      * 
      * @return string of bus stop data
      */
-    
-    public String convertToString() 
+    @Override
+    public String toString() 
     {
-    	//Don't print out long/lat/ any pointless data 
-        return "[" + index + "] " + ID + ", " + code + ", " + name + ", "
+    	 
+        return "[" + i + "] " + id + ", " + code + ", " + name + ", "
                 + desc;
     }
     
-    /**
-     * Checks if there exists a transfer between current busstop and input busstop
-     * @param dest : busstop to check if there is a transfer to
-     * @return true if yes, false otherwise
-     */ 
-    public boolean existsTransfer(Stops dest) 
-    {
-        for (Edge edge : edges) 
-        {
-            
-                return true;
-            
-        }
-        return false;
-    }
+ 
 
     /**
      * Compares bus stop to another busstop based on ids
@@ -72,9 +60,15 @@ public class Stops implements Comparable<Stops>
     @Override
     public int compareTo(Stops stop) 
     {
-        
+        if (this.id == ((Stops) stop).id) 
+        {
             return 0;
-      
+        } 
+        else if (this.id < ((Stops) stop).id) 
+        {
+            return -1;
+        }
+        return 1;
     }
 
     /**
@@ -82,94 +76,109 @@ public class Stops implements Comparable<Stops>
      * @param id : id we want to find
      * @return busedge with that trip id, null if it doesnt exist
      */
-    public Edge findBusEdge(int id) 
+     public Edge findBusEdge(int id) 
     {
-    
+    	//uses binary search
+        int low = 0;
+        int high = edges.size() - 1;
+
+        while (low <= high) 
+        {
+            int middle = low + ((high - low) / 2);
+            int midID = edges.get(middle).getTripID();
+
+            if (midID == id)
+                return edges.get(middle);
+            else if (midID > id)
+                high = middle - 1;
+            else
+                low = middle + 1;
+        }
         return null;
     }
 
-    /**
-     * @return bus stop id
-     */
+   
     public int getID() 
     {
-        return ID;
+        return id;
     }
 
-    /**
-     * @return bus stop code
-     */
+   
     public int getCode()
     {
         return code;
     }
 
-    /**
-     * @return bus stop name
-     */
+   
     public String getName()
     {
         return name;
     }
 
-    /**
-     * @return bus stop desc
-     */
+    
     public String getDesc()
     {
         return desc;
     }
 
-    /**
-     * @return bus stop lat
-     */
+    
     public Double getLat() 
     {
         return lat;
     }
 
-    /**
-     * @return bus stop lon
-     */
+   
     public Double getLon() 
     {
         return lon;
     }
 
-    /**
-     * @return bus stop zoneID
-     */
+   
     public String getZoneID() 
     {
         return zoneID;
     }
 
-    /**
-     * @return bus stop loctype
-     */
+   
     public int getLocType() 
     {
         return locType;
     }
 
- 
- 
- 
-
-    /**
-     * @return bus stop index in bus stop array
-     */
-    public int getIndex()
+    
+    public int getParent()
     {
-        return index;
+        return parent;
     }
 
-    /**
-     * @param index: new bus stop index
-     */
+   
+    public ArrayList<Edge> Edges() 
+    {
+        return edges;
+    }
+
+    
+    public boolean addEdge(Edge edge) 
+    {
+        return edges.add(edge);
+    }
+
+   //sort using collections- helped by geeksforgeeks website.
+    public void sortEdges()
+    {
+        Collections.sort(edges);
+    }
+
+   
+    public int getIndex()
+    {
+        return i;
+    }
+
+    
     public void setIndex(int index) 
     {
-        this.index = index;
+        this.i = index;
     }
 
 }
